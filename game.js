@@ -459,18 +459,23 @@ function updateBoardScale() {
 
   let scale = 1;
 
-  // 모바일 세로 모드일 때만 scale 적용
+  // 모바일 세로
   if (vw < vh) {
     scale = vw / BOARD_WIDTH;
-  } else {
-    // 가로 모드 or PC → 노트북처럼
-    scale = 1;
+  }
+  // 모바일 가로
+  else {
+    // 가로는 PC처럼 보이되, 높이 초과 시만 보정
+    if (BOARD_HEIGHT > vh) {
+      scale = vh / BOARD_HEIGHT;
+    } else {
+      scale = 1;
+    }
   }
 
   wrapper.style.transform =
     `translate(-50%, -50%) scale(${scale})`;
 }
-
 
 window.addEventListener('resize', updateBoardScale);
 
