@@ -10,11 +10,18 @@
 <body>
     <div id="game-header">
         <span>Score: <span id="score">0</span></span>
+
         <span style="margin-left: 12px;">
             Time: <span id="time">60</span>
         </span>
-        <span id="combo" style="margin-left: 12px;"></span>
+
+        <div id="timer-bar">
+            <div id="timer-bar-fill"></div>
+        </div>
+
+        <span id="combo"></span>
     </div>
+
 
     <div id="game-board"></div>
     <div id="game-over-overlay" class="hidden">

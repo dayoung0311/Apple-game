@@ -105,3 +105,29 @@ body {
 .game-over-content p {
   font-size: 20px;
 }
+
+/* =========================
+   TIMER BAR
+========================= */
+#timer-bar {
+  width: 180px;
+  height: 10px;
+  margin-left: 12px;
+
+  background: #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#timer-bar-fill {
+  height: 100%;
+  width: 100%;
+
+  background: #4caf50; /* 기본 초록 */
+  border-radius: 6px;
+
+  transition: width 0.3s linear, background-color 0.3s linear;
+}

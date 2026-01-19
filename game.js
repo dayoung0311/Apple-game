@@ -29,8 +29,7 @@ const comboEl = document.getElementById('combo');
 const timeEl = document.getElementById('time');
 const gameOverOverlay = document.getElementById('game-over-overlay');
 const finalScoreEl = document.getElementById('final-score');
-
-
+const timerBarFill = document.getElementById('timer-bar-fill');
 
 function getRandomNumber() {
     return Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
@@ -58,30 +57,30 @@ function createApples() {
 }
 
 function renderApples(apples) {
-  board.innerHTML = '';
-  appleElements.clear();
+    board.innerHTML = '';
+    appleElements.clear();
 
-  apples.forEach((apple) => {
-    if (apple.removed) return;
+    apples.forEach((apple) => {
+        if (apple.removed) return;
 
-    const el = document.createElement('div');
-    el.className = 'apple';
-    el.textContent = apple.value;
+        const el = document.createElement('div');
+        el.className = 'apple';
+        el.textContent = apple.value;
 
-    el.dataset.id = apple.id;
-    el.dataset.row = apple.row;
-    el.dataset.col = apple.col;
+        el.dataset.id = apple.id;
+        el.dataset.row = apple.row;
+        el.dataset.col = apple.col;
 
-    // 좌표 고정
-    el.style.left = `${apple.x}px`;
-    el.style.top = `${apple.y}px`;
+        // 좌표 고정
+        el.style.left = `${apple.x}px`;
+        el.style.top = `${apple.y}px`;
 
-    el.addEventListener('mousedown', onAppleMouseDown);
-    el.addEventListener('mouseenter', onAppleMouseEnter);
+        el.addEventListener('mousedown', onAppleMouseDown);
+        el.addEventListener('mouseenter', onAppleMouseEnter);
 
-    appleElements.set(apple.id, el);
-    board.appendChild(el);
-  });
+        appleElements.set(apple.id, el);
+        board.appendChild(el);
+    });
 }
 
 function initGame() {
@@ -94,6 +93,7 @@ function initGame() {
 
   updateScoreUI();
   updateTimeUI();
+  updateTimerBar();
 
   renderApples(apples);
   startTimer();
@@ -314,39 +314,60 @@ function calculateScore({ count, combo }) {
 }
 
 function updateTimeUI() {
-  timeEl.textContent = timeLeft;
+    timeEl.textContent = timeLeft;
 }
-function startTimer() {
-  stopTimer(); // 중복 방지
+function updateTimerBar() {
+    if (!timerBarFill) return;
 
-  timerId = setInterval(() => {
-    if (gameState !== 'PLAYING') return;
+    const ratio = timeLeft / GAME_TIME;
+    const percentage = Math.max(0, ratio * 100);
 
-    timeLeft -= 1;
-    updateTimeUI();
+    // 길이 조절
+    timerBarFill.style.width = `${percentage}%`;
 
-    if (timeLeft <= 0) {
-      endGame();
+    // 색상 변화
+    if (ratio <= 0.1) {
+        timerBarFill.style.background = '#e53935'; // 빨강
+    } else if (ratio <= 0.3) {
+        timerBarFill.style.background = '#fbc02d'; // 노랑
+    } else {
+        timerBarFill.style.background = '#4caf50'; // 초록
     }
-  }, 1000);
+}
+
+function startTimer() {
+    stopTimer(); // 중복 방지
+
+    timerId = setInterval(() => {
+        if (gameState !== 'PLAYING') return;
+
+        timeLeft -= 1;
+        updateTimeUI();
+        updateTimerBar();
+
+
+        if (timeLeft <= 0) {
+            endGame();
+        }
+    }, 1000);
 }
 
 function stopTimer() {
-  if (timerId) {
-    clearInterval(timerId);
-    timerId = null;
-  }
+    if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+    }
 }
 
 function endGame() {
-  gameState = 'ENDED';
-  stopTimer();
+    gameState = 'ENDED';
+    stopTimer();
 
-  // 최종 점수 표시
-  finalScoreEl.textContent = score;
+    // 최종 점수 표시
+    finalScoreEl.textContent = score;
 
-  // 오버레이 표시
-  gameOverOverlay.classList.remove('hidden');
+    // 오버레이 표시
+    gameOverOverlay.classList.remove('hidden');
 }
 
 
