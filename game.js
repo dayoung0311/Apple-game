@@ -49,14 +49,14 @@ function renderApples(apples) {
 
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
-      // 1️⃣ cell 생성
+      // 1️. cell 생성
       const cell = document.createElement('div');
       cell.className = 'cell';
 
       const key = `${row}-${col}`;
       cellElements.set(key, cell);
 
-      // 2️⃣ 해당 위치의 apple 찾기
+      // 2️. 해당 위치의 apple 찾기
       const apple = apples.find(
         (a) => a.row === row && a.col === col && !a.removed
       );
@@ -116,7 +116,7 @@ function onAppleMouseEnter(e) {
     const lastApple = getLastSelectedApple();
     const nextApple = getAppleById(appleId);
 
-    if (!isAdjacent(lastApple, nextApple)) return;
+   if (!canConnect(lastApple, nextApple)) return;
 
     selectApple(target);
 }
@@ -200,8 +200,63 @@ function isAdjacent(a, b) {
     return rowDiff <= 1 && colDiff <= 1;
 }
 
+function canConnect(a, b) {
+  if (!a || !b) return false;
+
+  const visited = Array.from({ length: ROWS }, () =>
+    Array(COLS).fill(false)
+  );
+
+  const queue = [];
+  queue.push([a.row, a.col]);
+  visited[a.row][a.col] = true;
+
+  // 8방향 (대각선 포함)
+  const directions = [
+    [-1, 0], [1, 0], [0, -1], [0, 1],
+    [-1, -1], [-1, 1], [1, -1], [1, 1],
+  ];
+
+  while (queue.length > 0) {
+    const [row, col] = queue.shift();
+
+    // 목표 도달
+    if (row === b.row && col === b.col) {
+      return true;
+    }
+
+    for (const [dr, dc] of directions) {
+      const nr = row + dr;
+      const nc = col + dc;
+
+      // 범위 체크
+      if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+      if (visited[nr][nc]) continue;
+
+      const apple = getAppleAt(nr, nc);
+
+      // 이동 가능 조건
+      // 1. 빈 칸
+      // 2. 또는 목표 위치
+      if (!apple || (nr === b.row && nc === b.col)) {
+        visited[nr][nc] = true;
+        queue.push([nr, nc]);
+      }
+    }
+  }
+
+  return false;
+}
+
+
 function getAppleById(id) {
     return apples.find((a) => a.id === id);
+}
+
+function getAppleAt(row, col) {
+  return apples.find(
+    (a) => a.row === row && a.col === col && !a.removed
+  );
 }
 
 function getLastSelectedApple() {
