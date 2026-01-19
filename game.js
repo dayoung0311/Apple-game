@@ -454,20 +454,23 @@ function onPointerUp() {
 function updateBoardScale() {
   const wrapper = document.getElementById('game-wrapper');
 
-  const viewportWidth = window.innerWidth;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
 
-  // 📱 모바일 기준 판단 (대략 768px)
-  if (viewportWidth < 768) {
-    const scale = viewportWidth / BOARD_WIDTH;
+  let scale = 1;
 
-    wrapper.style.transform =
-      `translate(-50%, -50%) scale(${scale})`;
+  // 모바일 세로 모드일 때만 scale 적용
+  if (vw < vh) {
+    scale = vw / BOARD_WIDTH;
   } else {
-    // 🖥 PC에서는 원본 크기
-    wrapper.style.transform =
-      `translate(-50%, -50%) scale(1)`;
+    // 가로 모드 or PC → 노트북처럼
+    scale = 1;
   }
+
+  wrapper.style.transform =
+    `translate(-50%, -50%) scale(${scale})`;
 }
+
 
 window.addEventListener('resize', updateBoardScale);
 
