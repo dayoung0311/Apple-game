@@ -16,6 +16,16 @@ let currentSum = 0;
 
 const GAME_TIME = 60;
 
+const BOARD_COLS = 17;
+const BOARD_ROWS = 10;
+
+const BOARD_WIDTH =
+  BOARD_COLS * CELL_SIZE + (BOARD_COLS - 1) * GAP;
+
+const BOARD_HEIGHT =
+  BOARD_ROWS * CELL_SIZE + (BOARD_ROWS - 1) * GAP;
+
+
 let timeLeft = GAME_TIME;
 let timerId = null;
 
@@ -442,17 +452,21 @@ function onPointerUp() {
 }
 
 function updateBoardScale() {
-    const wrapper = document.getElementById('game-wrapper');
-    const board = document.getElementById('game-board');
+  const wrapper = document.getElementById('game-wrapper');
 
-    const boardRect = board.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
 
-    const scaleX = window.innerWidth / boardRect.width;
-    const scaleY = window.innerHeight / boardRect.height;
+  // 📱 모바일 기준 판단 (대략 768px)
+  if (viewportWidth < 768) {
+    const scale = viewportWidth / BOARD_WIDTH;
 
-    const scale = Math.min(scaleX, scaleY, 1);
-
-    wrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    wrapper.style.transform =
+      `translate(-50%, -50%) scale(${scale})`;
+  } else {
+    // 🖥 PC에서는 원본 크기
+    wrapper.style.transform =
+      `translate(-50%, -50%) scale(1)`;
+  }
 }
 
 window.addEventListener('resize', updateBoardScale);
