@@ -1,13 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사과 게임</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <title>Apple Game</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-    <canvas id="gameCanvas"></canvas>
+    <div id="game-header">
+        <span>Score: </span>
+        <span id="score">0</span>
+        <span id="combo"></span>
+    </div>
+
+    <div id="game-board"></div>
+
     <script src="game.js"></script>
 </body>
+
 </html>

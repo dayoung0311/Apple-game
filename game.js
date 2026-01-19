@@ -1,0 +1,259 @@
+const ROWS = 10;
+const COLS = 17;
+const MIN = 1;
+const MAX = 9;
+
+let apples = [];
+let score = 0;
+let combo = 0;
+
+let isDragging = false;
+let selectedApples = [];
+let currentSum = 0;
+
+const board = document.getElementById('game-board');
+const appleElements = new Map();
+const cellElements = new Map();   // "row-col" → cell DOM
+
+const scoreEl = document.getElementById('score');
+const comboEl = document.getElementById('combo');
+
+
+function getRandomNumber() {
+    return Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+}
+
+function createApples() {
+    const apples = [];
+
+    for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+            apples.push({
+                id: crypto.randomUUID(),
+                value: getRandomNumber(),
+                row,
+                col,
+                removed: false,
+            });
+
+        }
+    }
+
+    return apples;
+}
+
+function renderApples(apples) {
+  board.innerHTML = '';
+  cellElements.clear();
+  appleElements.clear();
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      // 1️⃣ cell 생성
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+
+      const key = `${row}-${col}`;
+      cellElements.set(key, cell);
+
+      // 2️⃣ 해당 위치의 apple 찾기
+      const apple = apples.find(
+        (a) => a.row === row && a.col === col && !a.removed
+      );
+
+      if (apple) {
+        const el = document.createElement('div');
+        el.className = 'apple';
+        el.textContent = apple.value;
+
+        el.dataset.id = apple.id;
+        el.dataset.row = apple.row;
+        el.dataset.col = apple.col;
+
+        el.addEventListener('mousedown', onAppleMouseDown);
+        el.addEventListener('mouseenter', onAppleMouseEnter);
+
+        appleElements.set(apple.id, el);
+        cell.appendChild(el);
+      }
+
+      board.appendChild(cell);
+    }
+  }
+}
+
+function initGame() {
+  apples = createApples();
+
+  score = 0;
+  combo = 0;
+  updateScoreUI();
+
+  renderApples(apples);
+}
+
+
+
+initGame();
+
+document.addEventListener('mouseup', onMouseUp);
+
+function onAppleMouseDown(e) {
+    isDragging = true;
+    resetSelection();
+
+    selectApple(e.target); // 첫 사과는 인접 검사 없이 선택
+}
+
+function onAppleMouseEnter(e) {
+    if (!isDragging) return;
+
+    const target = e.target;
+    const appleId = target.dataset.id;
+
+    if (selectedApples.includes(appleId)) return;
+
+    const lastApple = getLastSelectedApple();
+    const nextApple = getAppleById(appleId);
+
+    if (!isAdjacent(lastApple, nextApple)) return;
+
+    selectApple(target);
+}
+
+function onMouseUp() {
+    if (!isDragging) return;
+
+    isDragging = false;
+
+  if (currentSum === 10) {
+  const count = selectedApples.length;
+
+  // 1️. 점수 계산
+  const gainedScore = calculateScore({
+    count,
+    combo,
+  });
+
+  // 2️. 점수 반영
+  score += gainedScore;
+  combo += 1;
+
+  updateScoreUI();
+
+  // 3️. 사과 제거
+  removeSelectedApples();
+} else {
+  // 실패 시 콤보 초기화
+  combo = 0;
+  updateScoreUI();
+}
+
+resetSelection();
+
+}
+
+function clearSelection() {
+    selectedApples.forEach((id) => {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        if (el) el.classList.remove('selected');
+    });
+
+    selectedApples = [];
+    currentSum = 0;
+}
+
+
+function selectApple(el) {
+  const id = el.dataset.id;
+  const apple = getAppleById(id);
+
+  if (!apple) return;
+
+  selectedApples.push(id);
+  currentSum += apple.value;
+
+  // appleElements 기준으로 selected 처리
+  const appleEl = appleElements.get(id);
+  if (appleEl) {
+    appleEl.classList.add('selected');
+  }
+}
+
+
+function resetSelection() {
+  selectedApples.forEach((id) => {
+    const el = appleElements.get(id);
+    if (el) el.classList.remove('selected');
+  });
+
+  selectedApples = [];
+  currentSum = 0;
+}
+
+function isAdjacent(a, b) {
+    if (!a || !b) return false;
+
+    const rowDiff = Math.abs(a.row - b.row);
+    const colDiff = Math.abs(a.col - b.col);
+
+    return rowDiff <= 1 && colDiff <= 1;
+}
+
+function getAppleById(id) {
+    return apples.find((a) => a.id === id);
+}
+
+function getLastSelectedApple() {
+    if (selectedApples.length === 0) return null;
+    return getAppleById(selectedApples[selectedApples.length - 1]);
+}
+
+function removeSelectedApples() {
+  selectedApples.forEach((id) => {
+    // 데이터 제거
+    const apple = getAppleById(id);
+    apple.removed = true;
+
+    // DOM 제거 (cell은 유지)
+    const appleEl = appleElements.get(id);
+    if (appleEl) {
+      appleEl.remove();
+      appleElements.delete(id);
+    }
+  });
+}
+
+function updateScoreUI() {
+  scoreEl.textContent = score;
+
+  if (combo >= 2) {
+    comboEl.textContent = `콤보 x${combo}`;
+  } else {
+    comboEl.textContent = '';
+  }
+}
+
+function getComboMultiplier(combo) {
+  if (combo >= 3) return 2.0;
+  if (combo === 2) return 1.5;
+  return 1.0;
+}
+
+function calculateScore({ count, combo }) {
+  // 1️. 기본 점수 (누적 방식)
+  let baseScore = count * 10;
+
+  // 2️. 효율성 보너스
+  let efficiencyBonus = count >= 4 ? 50 : 0;
+
+  // 3️. 콤보 배율
+  const multiplier = getComboMultiplier(combo);
+
+  // 4️. 최종 점수
+  return Math.floor((baseScore + efficiencyBonus) * multiplier);
+}
+
+
+
+

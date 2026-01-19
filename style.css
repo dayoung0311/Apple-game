@@ -1,0 +1,57 @@
+/* 전체 중앙 배치 */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
+#game-board {
+  display: grid;
+  grid-template-columns: repeat(17, 40px);
+  grid-template-rows: repeat(10, 40px);
+  gap: 6px;
+}
+
+/* 🔥 새로 추가 */
+.cell {
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+/* 기존 apple */
+.apple {
+  width: 100%;
+  height: 100%;
+  background: #e74c3c;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  user-select: none;
+}
+
+.apple.selected {
+  outline: 3px solid yellow;
+}
+
+.apple.removed {
+  opacity: 0;
+}
+
+#game-header {
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#combo {
+  margin-left: 12px;
+  color: orange;
+}
