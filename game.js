@@ -77,7 +77,7 @@ function renderApples(apples) {
         el.style.top = `${apple.y}px`;
 
         el.addEventListener('mousedown', onAppleMouseDown);
-        el.addEventListener('mouseenter', onAppleMouseEnter);
+        el.addEventListener('pointerdown', onPointerDown);
 
         appleElements.set(apple.id, el);
         board.appendChild(el);
@@ -85,19 +85,20 @@ function renderApples(apples) {
 }
 
 function initGame() {
-  apples = createApples();
+    apples = createApples();
 
-  score = 0;
-  combo = 0;
-  timeLeft = GAME_TIME;
-  gameState = 'PLAYING';
+    score = 0;
+    combo = 0;
+    timeLeft = GAME_TIME;
+    gameState = 'PLAYING';
 
-  updateScoreUI();
-  updateTimeUI();
-  updateTimerBar();
+    updateScoreUI();
+    updateTimeUI();
+    updateTimerBar();
 
-  renderApples(apples);
-  startTimer();
+    renderApples(apples);
+    updateBoardScale();
+    startTimer();
 }
 
 initGame();
@@ -372,15 +373,87 @@ function endGame() {
 }
 
 restartBtn.addEventListener('click', () => {
-  // 1️. Game Over 화면 숨기기
-  gameOverOverlay.classList.add('hidden');
+    // 1️. Game Over 화면 숨기기
+    gameOverOverlay.classList.add('hidden');
 
-  // 2️. 기존 타이머 완전 정지 (안전)
-  stopTimer();
+    // 2️. 기존 타이머 완전 정지 (안전)
+    stopTimer();
 
-  // 3️. 게임 초기화 (핵심)
-  initGame();
+    // 3️. 게임 초기화 (핵심)
+    initGame();
 });
 
+document.addEventListener('pointermove', onPointerMove);
+document.addEventListener('pointerup', onPointerUp);
+document.addEventListener('pointercancel', onPointerUp);
 
+function onPointerDown(e) {
+    if (gameState !== 'PLAYING') return;
+
+    const target = e.target.closest('.apple');
+    if (!target) return;
+
+    isDragging = true;
+    resetSelection();
+
+    selectApple(target);
+}
+
+function onPointerMove(e) {
+    if (!isDragging || gameState !== 'PLAYING') return;
+
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if (!el) return;
+
+    const appleEl = el.closest('.apple');
+    if (!appleEl) return;
+
+    const appleId = appleEl.dataset.id;
+    if (selectedApples.includes(appleId)) return;
+
+    const lastApple = getLastSelectedApple();
+    const nextApple = getAppleById(appleId);
+
+    if (!canConnect(lastApple, nextApple)) return;
+
+    selectApple(appleEl);
+}
+
+function onPointerUp() {
+    if (!isDragging) return;
+
+    isDragging = false;
+
+    if (currentSum === 10) {
+        const count = selectedApples.length;
+        const gainedScore = calculateScore({ count, combo });
+
+        score += gainedScore;
+        combo += 1;
+        updateScoreUI();
+
+        removeSelectedApples();
+    } else {
+        combo = 0;
+        updateScoreUI();
+    }
+
+    resetSelection();
+}
+
+function updateBoardScale() {
+    const wrapper = document.getElementById('game-wrapper');
+    const board = document.getElementById('game-board');
+
+    const boardRect = board.getBoundingClientRect();
+
+    const scaleX = window.innerWidth / boardRect.width;
+    const scaleY = window.innerHeight / boardRect.height;
+
+    const scale = Math.min(scaleX, scaleY, 1);
+
+    wrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
+}
+
+window.addEventListener('resize', updateBoardScale);
 
