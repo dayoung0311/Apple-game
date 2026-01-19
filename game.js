@@ -8,7 +8,7 @@ let score = 0;
 let combo = 0;
 
 const CELL_SIZE = 40;
-const GAP = 6;
+const GAP = 22;
 
 let isDragging = false;
 let selectedApples = [];
@@ -30,6 +30,7 @@ const timeEl = document.getElementById('time');
 const gameOverOverlay = document.getElementById('game-over-overlay');
 const finalScoreEl = document.getElementById('final-score');
 const timerBarFill = document.getElementById('timer-bar-fill');
+const restartBtn = document.getElementById('restart-btn');
 
 function getRandomNumber() {
     return Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
@@ -369,6 +370,17 @@ function endGame() {
     // 오버레이 표시
     gameOverOverlay.classList.remove('hidden');
 }
+
+restartBtn.addEventListener('click', () => {
+  // 1️. Game Over 화면 숨기기
+  gameOverOverlay.classList.add('hidden');
+
+  // 2️. 기존 타이머 완전 정지 (안전)
+  stopTimer();
+
+  // 3️. 게임 초기화 (핵심)
+  initGame();
+});
 
 
 

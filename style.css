@@ -1,28 +1,39 @@
-/* 전체 중앙 배치 */
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
+    margin: 0;
     background: #f5f5f5;
     position: relative;
 }
 
+#game-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 #game-header {
-  position: absolute;
-  top: 20px;
-  left: 20px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
 
-  font-size: 20px;
-  font-weight: bold;
+    font-size: 20px;
+    font-weight: bold;
 
-  z-index: 1000; /* 사과보다 위 */
+    z-index: 1000;
+    /* 사과보다 위 */
 }
 
 #game-board {
     position: relative;
-    width: calc(17 * 40px + 16 * 6px);
-    height: calc(10 * 40px + 9 * 6px);
+    width: calc(17 *55px + 16 * 6px);
+    height: calc(10 * 50px + 9 * 6px);
 }
 
 /* cell은 이제 논리 개념만 사용 (DOM 제거 가능) */
@@ -32,19 +43,60 @@ body {
 
 .apple {
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     background: #e74c3c;
     border-radius: 50%;
     color: white;
     font-weight: bold;
-
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
 
     user-select: none;
 }
+
+.apple::before {
+    content: '';
+    position: absolute;
+
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 6px;
+    height: 8px;
+
+    background: #5d4037;
+    /* 갈색 줄기 */
+    border-radius: 2px;
+
+    z-index: 2;
+}
+
+.apple::after {
+    content: '';
+    position: absolute;
+
+    /* 🍎 핵심: 줄기 바로 위에서 시작 */
+    top: -5px;
+    left: 48%;
+
+    width: 16px;
+    height: 9px;
+
+    background: #43a047;
+
+    /* 🍎 이모지 특유의 잎 모양 */
+    border-radius: 0 100% 0 100%;
+
+    /* 🍎 뒤로 젖혀진 느낌 */
+    transform: rotate(-45deg);
+
+    z-index: 1;
+}
+
 
 .apple.selected {
     outline: 3px solid yellow;
@@ -69,65 +121,147 @@ body {
    GAME OVER OVERLAY
 ========================= */
 #game-over-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+    position: fixed;
+    inset: 0;
 
-  background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.65);
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  z-index: 2000;
+    z-index: 3000;
 }
 
 #game-over-overlay.hidden {
-  display: none;
+    display: none;
 }
 
 .game-over-content {
-  background: white;
-  padding: 40px 60px;
-  border-radius: 12px;
-  text-align: center;
+    background: white;
+    padding: 40px 60px;
+    border-radius: 12px;
+    text-align: center;
 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .game-over-content h1 {
-  font-size: 36px;
-  margin-bottom: 20px;
+    font-size: 36px;
+    margin-bottom: 20px;
 }
 
 .game-over-content p {
-  font-size: 20px;
+    font-size: 20px;
 }
+
+.game-over-card {
+    width: 360px;
+    padding: 48px 40px;
+
+    background: #ffffff;
+    border-radius: 20px;
+
+    text-align: center;
+
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.35),
+        0 0 0 6px rgba(255, 255, 255, 0.05);
+
+    animation: popIn 0.35s ease-out;
+}
+
+.game-over-card h1 {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 1px;
+
+    margin-bottom: 40px;
+
+    color: #e53935;
+}
+
+.final-score {
+    font-size: 20px;
+    font-weight: 600;
+    color: #555;
+}
+
+.final-score span {
+    display: block;
+
+    margin-top: 8px;
+
+    font-size: 36px;
+    font-weight: 800;
+    color: #222;
+}
+
 
 /* =========================
    TIMER BAR
 ========================= */
 #timer-bar {
-  width: 180px;
-  height: 10px;
-  margin-left: 12px;
+    width: 180px;
+    height: 10px;
+    margin-left: 12px;
 
-  background: #ddd;
-  border-radius: 6px;
-  overflow: hidden;
+    background: #ddd;
+    border-radius: 6px;
+    overflow: hidden;
 
-  display: inline-block;
-  vertical-align: middle;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 #timer-bar-fill {
-  height: 100%;
-  width: 100%;
+    height: 100%;
+    width: 100%;
 
-  background: #4caf50; /* 기본 초록 */
-  border-radius: 6px;
+    background: #4caf50;
+    /* 기본 초록 */
+    border-radius: 6px;
 
-  transition: width 0.3s linear, background-color 0.3s linear;
+    transition: width 0.3s linear, background-color 0.3s linear;
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.85) translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#restart-btn {
+  margin-top: 32px;
+  padding: 14px 32px;
+
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  color: white;
+  background: #e53935;
+
+  border: none;
+  border-radius: 999px;
+
+  cursor: pointer;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+#restart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+#restart-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
